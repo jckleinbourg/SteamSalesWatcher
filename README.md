@@ -1,17 +1,19 @@
 # Steam Sales Watcher
-## V3.1
-### Last tested: 07/12/2018
+## V3.11
+### Last tested: 07/13/2018
 
 This JS app grabs your wishlist page from Steam, and shows available promotions from other web-sites.
 Then you can sort by price / discount or name.
 
 *You need a Steam ID and to make your wishlist public to make it work.*
 
-![Screenshot](http://jck-interactive.com/steamsaleswatcher/screenshot.png)
+Demo: [https://jck-interactive.com/steamsaleswatcher](https://jck-interactive.com/steamsaleswatcher)
+
+![Screenshot](https://jck-interactive.com/steamsaleswatcher/screenshot.png)
 
 It uses:
 * EnhancedSteam (API v3)
-* the webservice cors-anywhere.herokuapp.com to make the requests to EnhancedSteam API
+* cors-anywhere.herokuapp.com to get the Steam wishlist page
 * Boostrap 3
 * jQuery
 

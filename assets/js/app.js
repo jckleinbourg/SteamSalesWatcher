@@ -37,6 +37,7 @@ var _storesStr;
 var _cc = "fr";
 
 var _data;
+var total, counter;
 
 function init() {
 
@@ -90,8 +91,8 @@ function parseWishlist(wish_data, wish_info) {
 	$("#part2").show();
 	$("#loading-wishlist").hide();
 
-	var counter = 0;
-	var total = wish_data.length;
+	counter = 0;
+	total = wish_data.length;
 
 	for (var i = 0; i < wish_data.length; i++) {
 
@@ -133,10 +134,12 @@ function parseWishlist(wish_data, wish_info) {
 			counter++;
 
 			if (counter >= total) {
+
+				_data.sort(SortByDiscount);
+				showWishlist();
+
 				$("#part2").hide();
 				$("#part3").show();
-
-				showWishlist();
 
 				function showWishlist() {
 					$("#wishlist").empty();
@@ -175,24 +178,24 @@ function parseWishlist(wish_data, wish_info) {
 
 				// sort by discount
 				$("#bt-sort-discount").click(function () {
-					function SortByDiscount(a, b) {
-						var aDiscount = a.current_cut;
-						var bDiscount = b.current_cut;
-						if (aDiscount == "_") {
-							return 1;
-						} else if (bDiscount == "_") {
-							return -1;
-						} else {
-							return ((aDiscount > bDiscount) ? -1 : ((aDiscount < bDiscount) ? 1 : 0));
-						}
-					}
 					_data.sort(SortByDiscount);
 					showWishlist();
 				});
+				function SortByDiscount(a, b) {
+					var aDiscount = a.current_cut;
+					var bDiscount = b.current_cut;
+					if (aDiscount == "_") {
+						return 1;
+					} else if (bDiscount == "_") {
+						return -1;
+					} else {
+						return ((aDiscount > bDiscount) ? -1 : ((aDiscount < bDiscount) ? 1 : 0));
+					}
+				}
 
 			}
 		}
-	};
+	}
 }
 
 function generateView(obj) {
@@ -226,12 +229,15 @@ function generateView(obj) {
 }
 
 function get_price_data(obj, id, callback) {
+	var xhr = createCORSRequest('GET', "https://api.enhancedsteam.com/pricev3/?appid=" + id + "&stores=" + _storesStr + "&cc=" + _cc + "&coupon=true");
+	xhr.send();
+	xhr.onload = function () {
+		var responseText = xhr.responseText;
+		var data = JSON.parse(responseText);
 
-	get_http("https://api.enhancedsteam.com/pricev3/?appid=" + id + "&stores=" + _storesStr + "&cc=" + _cc + "&coupon=true", function (txt) {
-
-		var data = JSON.parse(txt);
-
-		data = data["app/" + id]; //v3
+		if (data != undefined) {
+			data = data["app/" + id];
+		}
 
 		obj.current_price = "_";
 		obj.current_store = "_";
@@ -267,8 +273,12 @@ function get_price_data(obj, id, callback) {
 			}
 		}
 		callback(obj);
-	});
-}
+	}
+	xhr.onerror = function () {
+		console.log('There was an error!');
+		total--;
+	};
+};
 
 function get_http(url, callback) {
 	var jqxhr = $.ajax(url, {
@@ -279,4 +289,18 @@ function get_http(url, callback) {
 		console.log(jqxhr.status + ": " + errorThrown);
 	});
 	return jqxhr;
+}
+
+function createCORSRequest(method, url) {
+	var xhr = new XMLHttpRequest();
+	if ("withCredentials" in xhr) {
+		xhr.open(method, url, true);
+	} else if (typeof XDomainRequest != "undefined") {
+		xhr = new XDomainRequest();
+		xhr.open(method, url);
+
+	} else {
+		xhr = null;
+	}
+	return xhr;
 }
